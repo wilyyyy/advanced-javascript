@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Search box, how many requests does "hello" fire?</title>
+<style>
+  :root{--ground:#0a0e12;--surface:#0e141b;--sunken:#070a0d;--line:#22303c;--ink:#e6edf3;--mid:#a9b4c0;--dim:#7d8896;--accent:#36e794}
+  body{font:16px/1.5 'Inter',system-ui,-apple-system,sans-serif;max-width:44rem;margin:3rem auto;padding:0 1.2rem;color:var(--ink);background:var(--ground)}
+  h1{font:700 1.2rem 'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.02em}
+  h1::before{content:"$ ";color:var(--accent)}
+  .hint{color:var(--dim);font-size:.9rem}
+  fieldset{margin:1rem 0;border:2px solid var(--line);border-radius:6px;padding:.6rem 1rem}
+  label{margin-right:1.2rem;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.9rem}
+  input[type=text]{font:1.1rem 'JetBrains Mono',monospace;padding:.55rem .75rem;width:100%;box-sizing:border-box;background:var(--sunken);color:var(--ink);border:2px solid var(--line);border-radius:6px}
+  #log{background:var(--sunken);color:var(--accent);font:.95rem/1.6 'JetBrains Mono',ui-monospace,monospace;padding:.8rem 1rem;border:1px solid var(--line);border-radius:8px;height:12rem;overflow:auto;white-space:pre-wrap;margin-top:1rem;box-shadow:8px 8px 0 #144630}
+  .srclab{color:var(--dim);font:.72rem 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;margin:1.6rem 0 .5rem}
+  pre.src{background:var(--sunken);color:#cfe8dd;border:1px solid var(--line);border-radius:8px;padding:.85rem 1.1rem;font:.85rem/1.6 'JetBrains Mono',ui-monospace,monospace;overflow:auto;margin:0}
+  pre.src .cm{color:var(--dim)}
+  pre.src .kw{color:var(--accent)}
+</style>
+</head>
+<body>
+<h1>Search-as-you-type: how many requests does one word fire?</h1>
+<p class="hint">Pick a mode, type a word in the box, and watch the request log. Switching mode clears the log.</p>
+
+<fieldset>
+  <label><input type="radio" name="mode" value="naive" checked> naive, fire on every keystroke</label>
+  <label><input type="radio" name="mode" value="debounce"> debounced</label>
+  <label><input type="radio" name="mode" value="throttle"> throttled</label>
+</fieldset>
+
+<input type="text" id="q" placeholder="type a search term..." autocomplete="off">
+<div id="log"></div>
+
+<div class="srclab">the two implementations</div>
+<pre class="src"><span class="kw">function</span> debounce(fn, wait) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);                          <span class="cm">// every call wipes the pending timer...</span>
+    t = setTimeout(() => fn(...args), wait);  <span class="cm">// ...and starts a fresh one</span>
+  };
+}
+
+<span class="kw">function</span> throttle(fn, wait) {
+  let waiting = false;
+  return (...args) => {
+    if (waiting) return;                      <span class="cm">// in the cooldown? drop it</span>
+    fn(...args);                              <span class="cm">// otherwise fire straight away...</span>
+    waiting = true;
+    setTimeout(() => { waiting = false; }, wait);  <span class="cm">// ...then reopen after `wait`</span>
+  };
+}</pre>
+
+<script>
+  // Pretend this calls your search API. We just log the request.
+  let n = 0;
+  function search(term) {
+    log(`#${++n}  ->GET /search?q=${term}`);
+  }
+
+  // ---- the two answers, side by side ----
+  function debounce(fn, wait) {
+    let t;
+    return (...args) => {
+      clearTimeout(t);                          // every call wipes the pending timer...
+      t = setTimeout(() => fn(...args), wait);  // ...and starts a fresh one
+    };
+  }
+
+  function throttle(fn, wait) {
+    let waiting = false;
+    return (...args) => {
+      if (waiting) return;                      // in the cooldown? drop it
+      fn(...args);                              // otherwise fire straight away...
+      waiting = true;
+      setTimeout(() => { waiting = false; }, wait);  // ...then reopen after `wait`
+    };
+  }
+
+  // ---- wire the box to whichever mode is selected ----
+  const debouncedSearch = debounce(search, 400);
+  const throttledSearch = throttle(search, 400);
+
+  const box = document.getElementById("q");
+  box.addEventListener("input", (e) => {
+    const mode = document.querySelector('input[name=mode]:checked').value;
+    if (mode === "naive")         search(e.target.value);   // nit: it works. the server disagrees.
+    else if (mode === "debounce") debouncedSearch(e.target.value);
+    else                          throttledSearch(e.target.value);
+  });
+
+  // reset the counter + log whenever you switch mode
+  document.querySelectorAll('input[name=mode]').forEach((r) =>
+    r.addEventListener("change", () => { n = 0; document.getElementById("log").textContent = ""; box.focus(); })
+  );
+
+  function log(msg) {
+    const el = document.getElementById("log");
+    el.textContent += msg + "\n";
+    el.scrollTop = el.scrollHeight;
+  }
+</script>
+</body>
+</html>

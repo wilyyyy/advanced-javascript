@@ -1,0 +1,5 @@
+{
+  "type": "module",
+  "private": true,
+  "description": "worker.js is a Cloudflare Worker, and the Worker module format IS an ES module (export default { fetch }). The workshop root sets type:commonjs so the early DevTools-console lectures run sloppy under node; this one folder opts back into ESM so the very same worker.js file loads on Cloudflare and under plain node (../../serve.mjs imports it). Nothing in this lecture depends on sloppy mode: its surface is a browser page plus a DevTools snippet, never a bare node run."
+}

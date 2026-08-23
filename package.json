@@ -1,0 +1,5 @@
+{
+  "type": "commonjs",
+  "private": true,
+  "description": "Pins the whole tree to sloppy-mode CommonJS, matching the browser DevTools console surface the early lectures record on. Two things break without it, both proven: (1) the studio repo root is type:module, so a direct `node node/<exercise>/<file>.js` would load as strict ESM, where sloppy-only behaviour (e.g. let-const's Object.freeze silent no-op write) throws instead of matching the console; (2) F8 in a markdown handout stops working at all, because Code Runner hands node a temp .md file and node runs an unknown extension only as CommonJS (under type:module it is ERR_UNKNOWN_FILE_EXTENSION). It MUST travel into the published tree: the README documents the F8 workflow this pins. verify.mjs is unaffected (a .mjs file is always an ES module), and browser/fetch-2026/ opts back into ESM with its own package.json because worker.js is a Cloudflare Worker module."
+}

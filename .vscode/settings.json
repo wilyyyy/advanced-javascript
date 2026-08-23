@@ -1,0 +1,8 @@
+{
+  "workbench.colorTheme": "poimandres",
+  "editor.fontFamily": "'JetBrains Mono', 'SF Mono', Menlo, monospace",
+  "editor.fontSize": 12,
+  "editor.fontLigatures": false,
+  "breadcrumbs.enabled": false,
+  "editor.wordWrap": "on"
+}

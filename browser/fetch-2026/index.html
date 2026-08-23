@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>fetch in 2026 · workshop</title>
+<!--
+  Snippet host page for the "How does fetch work in 2026?" lecture.
+
+  Deliberately zero JavaScript. Two reasons, both about the recording: the console is
+  empty when Asim opens DevTools, and the Network tab shows only the requests the snippet
+  makes. Nothing on this page competes with the demo.
+
+  Its whole job is to be an origin. Served by ../../serve.mjs, which also mounts worker.js at
+  /api, so the snippet's relative "/api/users/1" is same origin: no CORS, and no Chrome
+  local network access prompt.
+-->
+<style>
+:root{--ground:#0a0e12;--surface:#0e141b;--sunken:#070a0d;--line:#22303c;--ink:#e6edf3;--mid:#a9b4c0;--dim:#7d8896;--accent:#36e794}
+*{box-sizing:border-box}
+body{font:16px/1.6 'Inter',system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--ground);margin:0}
+main{max-width:46rem;margin:0 auto;padding:4rem 1.5rem}
+h1{font:700 1.6rem 'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.02em;margin:0 0 .3rem}
+.scope{color:var(--dim);font:.85rem 'JetBrains Mono',monospace;margin:0 0 2rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1rem 1.4rem;margin:1rem 0;box-shadow:6px 6px 0 #144630}
+ol{margin:.4rem 0;padding-left:1.2rem}
+li{margin:.45rem 0}
+code{background:var(--sunken);color:var(--accent);padding:.05rem .3rem;border-radius:4px;font:.85em 'JetBrains Mono',monospace}
+a{color:var(--accent)}
+.routes{font:.85rem/1.9 'JetBrains Mono',monospace;color:var(--mid);margin:.4rem 0 0}
+.routes b{color:var(--accent);font-weight:400}
+</style></head><body><main>
+<h1>fetch in 2026</h1>
+<p class="scope">workshop demo host · adv-js S14 Networking</p>
+
+<div class="card">
+<p><b>You are on the right origin.</b> This page and the teaching API come off the same local
+server, so the snippet can ask for <code>/api/users/1</code> and the browser treats it as its own.
+No CORS, no local network permission prompt.</p>
+<ol>
+  <li>Open DevTools, go to <b>Sources &gt; Snippets</b>.</li>
+  <li>New snippet, name it <code>fetch-2026</code>.</li>
+  <li>Paste the <code>const API = "/api";</code> line from <a href="fetch-2026.js">fetch-2026.js</a>, then build it up block by block. <b>Cmd+Enter</b> runs the whole snippet, <b>Cmd+K</b> clears.</li>
+</ol>
+</div>
+
+<div class="card">
+<p><b>The API, if you want to poke it by hand.</b> Served by <a href="worker.js">worker.js</a>, the
+same file that runs on Cloudflare when this is published.</p>
+<p class="routes">
+<b>GET</b> <a href="/api/users">/api/users</a><br/>
+<b>GET</b> <a href="/api/users/1">/api/users/1</a><br/>
+<b>GET</b> <a href="/api/users/99">/api/users/99</a> (404, the <code>res.ok</code> gotcha)<br/>
+<b>POST</b> /api/users<br/>
+<b>GET</b> <a href="/api/posts?page=2">/api/posts?page=2</a><br/>
+<b>GET</b> <a href="/api/slow?ms=1000">/api/slow?ms=1000</a><br/>
+<b>GET</b> <a href="/api/status/404">/api/status/404</a>
+</p>
+</div>
+</main></body></html>
